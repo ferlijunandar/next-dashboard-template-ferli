@@ -1,5 +1,6 @@
 'use client';
 
+import { updateInvoice } from "@/app/lib/actions";
 import {
   CheckIcon,
   ClockIcon,
@@ -10,8 +11,10 @@ import Link from 'next/link';
 import { Button } from '@/app/ui/button';
 
 export default function EditInvoiceForm({ invoice, customers }) {
+  const updateInvoiceWithId = updateInvoice.bind(null, invoice.id);
   return (
-    <form>
+    <form action={updateInvoiceWithId}>
+      <input type="hidden" name="id" value={invoice.id} />
       <div className="p-4 rounded-md bg-gray-50 md:p-6">
         {/* Customer Name */}
         <div className="mb-4">

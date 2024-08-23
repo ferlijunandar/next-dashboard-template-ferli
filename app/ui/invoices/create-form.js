@@ -1,5 +1,20 @@
+// /app/ui/invoices/form.js
+
 import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
+import { Button } from '@/app/ui/button';
+import { createInvoice } from '@/app/lib/actions';
+
+export default function Form({ customers }) {
+  return (
+    <form action={createInvoice} method="post">
+      {/* Form fields and content here */}
+      
+      {/* Example button */}
+      <Button type="submit">Submit</Button>
+    </form>
+  );
+}
 
 export function CreateInvoice() {
   return (
@@ -26,7 +41,7 @@ export function UpdateInvoice({ id }) {
 
 export function DeleteInvoice({ id }) {
   return (
-    <button className="p-2 border rounded-md hover:bg-gray-100">
+    <button type="button" className="p-2 border rounded-md hover:bg-gray-100">
       <span className="sr-only">Delete</span>
       <TrashIcon className="w-5" />
     </button>
