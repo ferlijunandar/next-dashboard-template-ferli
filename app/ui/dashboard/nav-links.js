@@ -1,3 +1,7 @@
+// /app/ui/dashboard/nav-links.js
+
+"use client";
+
 import {
   UserGroupIcon,
   HomeIcon,
