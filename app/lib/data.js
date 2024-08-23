@@ -3,16 +3,8 @@ import { formatCurrency } from './utils';
 
 export async function fetchRevenue() {
   try {
-    // Artificially delay a response for demo purposes.
-    // Don't do this in production :)
-
-    // console.log('Fetching revenue data...');
-    // await new Promise((resolve) => setTimeout(resolve, 3000));
-
+    // Ambil semua data dari tabel revenue
     const data = await sql`SELECT * FROM revenue`;
-
-    // console.log('Data fetch completed after 3 seconds.');
-
     return data.rows;
   } catch (error) {
     console.error('Database Error:', error);
@@ -22,12 +14,14 @@ export async function fetchRevenue() {
 
 export async function fetchLatestInvoices() {
   try {
+    // Ambil 5 faktur terbaru berdasarkan tanggal
     const data = await sql`
       SELECT invoices.amount, customers.name, customers.image_url, customers.email, invoices.id
       FROM invoices
       JOIN customers ON invoices.customer_id = customers.id
       ORDER BY invoices.date DESC
-      LIMIT 5`;
+      LIMIT 5
+    `;
 
     const latestInvoices = data.rows.map((invoice) => ({
       ...invoice,
@@ -41,10 +35,9 @@ export async function fetchLatestInvoices() {
 }
 
 export async function fetchCardData() {
+
   try {
-    // You can probably combine these into a single SQL query
-    // However, we are intentionally splitting them to demonstrate
-    // how to initialize multiple queries in parallel with JS.
+    
     const invoiceCountPromise = sql`SELECT COUNT(*) FROM invoices`;
     const customerCountPromise = sql`SELECT COUNT(*) FROM customers`;
     const invoiceStatusPromise = sql`SELECT
@@ -58,16 +51,12 @@ export async function fetchCardData() {
       invoiceStatusPromise,
     ]);
 
-    const numberOfInvoices = Number(data[0].rows[0].count ?? '0');
-    const numberOfCustomers = Number(data[1].rows[0].count ?? '0');
-    const totalPaidInvoices = formatCurrency(data[2].rows[0].paid ?? '0');
-    const totalPendingInvoices = formatCurrency(data[2].rows[0].pending ?? '0');
 
     return {
-      numberOfCustomers,
-      numberOfInvoices,
-      totalPaidInvoices,
-      totalPendingInvoices,
+      numberOfCustomers: Number(customerCount.rows[0].count ?? '0'),
+      numberOfInvoices: Number(invoiceCount.rows[0].count ?? '0'),
+      totalPaidInvoices: formatCurrency(invoiceStatus.rows[0].paid ?? '0'),
+      totalPendingInvoices: formatCurrency(invoiceStatus.rows[0].pending ?? '0'),
     };
   } catch (error) {
     console.error('Database Error:', error);
@@ -80,6 +69,7 @@ export async function fetchFilteredInvoices(query, currentPage) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
+    // Ambil faktur berdasarkan query pencarian dan halaman saat ini
     const invoices = await sql`
       SELECT
         invoices.id,
@@ -110,16 +100,18 @@ export async function fetchFilteredInvoices(query, currentPage) {
 
 export async function fetchInvoicesPages(query) {
   try {
-    const count = await sql`SELECT COUNT(*)
-    FROM invoices
-    JOIN customers ON invoices.customer_id = customers.id
-    WHERE
-      customers.name ILIKE ${`%${query}%`} OR
-      customers.email ILIKE ${`%${query}%`} OR
-      invoices.amount::text ILIKE ${`%${query}%`} OR
-      invoices.date::text ILIKE ${`%${query}%`} OR
-      invoices.status ILIKE ${`%${query}%`}
-  `;
+    // Hitung total halaman berdasarkan query pencarian
+    const count = await sql`
+      SELECT COUNT(*)
+      FROM invoices
+      JOIN customers ON invoices.customer_id = customers.id
+      WHERE
+        customers.name ILIKE ${`%${query}%`} OR
+        customers.email ILIKE ${`%${query}%`} OR
+        invoices.amount::text ILIKE ${`%${query}%`} OR
+        invoices.date::text ILIKE ${`%${query}%`} OR
+        invoices.status ILIKE ${`%${query}%`}
+    `;
 
     const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
     return totalPages;
@@ -131,6 +123,7 @@ export async function fetchInvoicesPages(query) {
 
 export async function fetchInvoiceById(id) {
   try {
+    // Ambil detail faktur berdasarkan ID
     const data = await sql`
       SELECT
         invoices.id,
@@ -143,8 +136,7 @@ export async function fetchInvoiceById(id) {
 
     const invoice = data.rows.map((invoice) => ({
       ...invoice,
-      // Convert amount from cents to dollars
-      amount: invoice.amount / 100,
+      amount: invoice.amount / 100, // Ubah jumlah dari sen ke dolar
     }));
 
     return invoice[0];
@@ -156,6 +148,7 @@ export async function fetchInvoiceById(id) {
 
 export async function fetchCustomers() {
   try {
+    // Ambil semua pelanggan
     const data = await sql`
       SELECT
         id,
@@ -164,8 +157,7 @@ export async function fetchCustomers() {
       ORDER BY name ASC
     `;
 
-    const customers = data.rows;
-    return customers;
+    return data.rows;
   } catch (err) {
     console.error('Database Error:', err);
     throw new Error('Failed to fetch all customers.');
@@ -174,6 +166,7 @@ export async function fetchCustomers() {
 
 export async function fetchFilteredCustomers(query) {
   try {
+    // Ambil pelanggan berdasarkan query pencarian
     const data = await sql`
       SELECT
         customers.id,
