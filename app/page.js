@@ -1,11 +1,14 @@
 import AcmeLogo from '@/app/ui/acme-logo';
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
+import styles from '@/app/ui/home.module.css';
 
 export default function Page() {
   return (
     <main className="flex flex-col min-h-screen p-6">
       <div className="flex items-end h-20 p-4 bg-blue-500 rounded-lg shrink-0 md:h-52">
+        {/* Bentuk segitiga menggunakan gaya dari home.module.css */}
+        <div className={styles.shape} />
         {/* <AcmeLogo /> */}
       </div>
       <div className="flex flex-col gap-4 mt-4 grow md:flex-row">
